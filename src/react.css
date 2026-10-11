@@ -850,3 +850,50 @@ body.theme-dark {
   .search-modal .transaction-icon { width: 32px; height: 32px; }
   .search-modal .transaction-amount { font-size: 10px; }
 }
+
+/* Keep the Trends controls and summaries usable at narrow widths. */
+.trend-periods {
+  display: flex;
+  flex-wrap: wrap;
+  width: fit-content;
+  overflow: visible;
+}
+.trend-periods button { flex: 0 0 auto; }
+.range-row {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.range-row > label {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+.range-row input { width: 100%; min-width: 0; max-width: none; }
+.category-breakdown { min-width: 0; }
+.category-breakdown > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.category-breakdown > strong { min-width: 0; text-align: right; overflow-wrap: anywhere; }
+
+@media (max-width: 700px) {
+  .trend-periods {
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 4px;
+    width: 100%;
+  }
+  .trend-periods button { min-width: 0; padding: 9px 5px; }
+  .range-row { gap: 9px; }
+  .range-row > label { grid-template-columns: 1fr; gap: 5px; }
+  .range-row input { min-height: 42px; padding: 9px; }
+  .trend-summary .metric-card { min-width: 0; }
+}
+@media (max-width: 380px) {
+  .trend-periods button { padding: 9px 3px; font-size: 10px; }
+  .range-row { grid-template-columns: 1fr; }
+  .range-row > label { grid-template-columns: 42px minmax(0,1fr); }
+}
