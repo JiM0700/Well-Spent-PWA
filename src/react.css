@@ -785,3 +785,68 @@ body.theme-dark {
   .metric-card,.trend-summary .metric-card { padding: 14px 12px; }
   .modal { padding-left: 18px; padding-right: 18px; }
 }
+
+/* Search is a dedicated sheet so its filters stay visible while results scroll. */
+.modal.search-modal {
+  display: flex;
+  flex-direction: column;
+  width: min(760px,calc(100vw - 40px));
+  max-height: min(820px,calc(100dvh - 48px));
+  min-height: 0;
+  overflow: hidden;
+}
+.search-modal .modal-head { flex: 0 0 auto; }
+.search-filters {
+  display: grid;
+  grid-template-columns: minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr);
+  gap: 10px;
+  flex: 0 0 auto;
+  margin-bottom: 14px;
+}
+.search-filters > * { width: 100%; min-width: 0; }
+.search-modal .search-result {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.search-modal .search-entry { padding: 0 6px; }
+.search-modal .transaction { min-width: 0; gap: 10px; }
+.search-modal .transaction-info { min-width: 0; flex: 1 1 auto; }
+.search-modal .transaction-meta {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.search-modal .transaction-amount { flex: 0 0 auto; white-space: nowrap; }
+.search-modal .modal-actions { flex: 0 0 auto; position: static; padding-top: 12px; }
+@media (max-width: 700px) {
+  .modal-backdrop:has(.search-modal) { padding: 0; align-items: end; }
+  .modal.search-modal {
+    width: 100%;
+    max-width: none;
+    max-height: calc(100dvh - env(safe-area-inset-top));
+    min-height: min(62dvh,620px);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 16px max(14px,env(safe-area-inset-bottom));
+  }
+  .search-filters {
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    gap: 9px;
+  }
+  .search-filters > .input { grid-column: 1 / -1; }
+  .search-modal .modal-head { margin-bottom: 16px; }
+  .search-modal .modal-actions { margin-top: 10px; }
+}
+@media (max-width: 380px) {
+  .modal.search-modal { padding-left: 13px; padding-right: 13px; }
+  .search-filters { gap: 8px; }
+  .search-filters > .select { padding-left: 8px; padding-right: 8px; font-size: 11px; }
+  .search-modal .transaction { gap: 8px; padding: 12px 0; }
+  .search-modal .transaction-icon { width: 32px; height: 32px; }
+  .search-modal .transaction-amount { font-size: 10px; }
+}
