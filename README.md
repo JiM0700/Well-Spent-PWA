@@ -29,8 +29,8 @@ Deploy the contents of `dist/` over HTTPS. The production build includes a servi
 The workflow at `.github/workflows/deploy-pages.yml` builds the app and deploys `dist/` whenever a commit is pushed to `main`. It can also be started from the Actions tab with **Run workflow**.
 
 1. Create a GitHub repository and push this project's `main` branch to it.
-2. In the repository, open **Settings → Pages** and set **Build and deployment → Source** to **GitHub Actions**.
-3. Check the **Deploy to GitHub Pages** run in **Actions**. When it succeeds, the site URL appears in the deployment job and in **Settings → Pages**.
+2. Either open **Settings → Pages** and set **Build and deployment → Source** to **GitHub Actions**, or let the workflow enable Pages by adding a `PAGES_ENABLEMENT_TOKEN` repository secret under **Settings → Secrets and variables → Actions**. That token must belong to a repository administrator and have permission to enable Pages: use a classic PAT with the `repo` scope, or a fine-grained PAT with **Pages: Read and write** and **Administration: Read and write** for this repository.
+3. Open **Actions** and run **Deploy to GitHub Pages**, or push to `main`. The workflow deploys `dist/`. When it succeeds, the site URL appears in the deployment job and in **Settings → Pages**.
 
 The Vite build uses relative asset paths so it works at either a repository Pages URL or a root Pages URL. GitHub Pages serves the app over HTTPS. The app stores transactions in the visitor's browser; uploading code does not upload anyone's vault. A Pages URL is a different browser origin from `localhost:8000`, so existing local records will not appear there automatically. Export a JSON backup from the old URL and restore it on the Pages URL if you want those records there. Keep that backup private because exported JSON is unencrypted.
 

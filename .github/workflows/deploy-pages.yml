@@ -23,7 +23,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - uses: actions/configure-pages@v5
+      - name: Enable and configure GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: ${{ secrets.PAGES_ENABLEMENT_TOKEN != '' }}
+          token: ${{ secrets.PAGES_ENABLEMENT_TOKEN || github.token }}
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
