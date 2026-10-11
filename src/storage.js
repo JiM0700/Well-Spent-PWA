@@ -1,0 +1,21 @@
+import {clone,defaults} from './vault.js';
+
+const FORMAT='well-spent-encrypted-v1';
+let db, key=null, salt=null, lockedRecord=null, queue=Promise.resolve();
+const bytesToBase64 = bytes => {let result='';for(let i=0;i<bytes.length;i+=8192)result+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(result)};
+const base64ToBytes = value => Uint8Array.from(atob(value),char=>char.charCodeAt(0));
+function openDB() {return new Promise((resolve,reject)=>{if(!('indexedDB' in window))return reject(new Error('IndexedDB is unavailable.'));const request=indexedDB.open('well-spent-local',1);request.onupgradeneeded=()=>request.result.createObjectStore('data');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
+function readRaw() {return new Promise((resolve,reject)=>{const request=db.transaction('data').objectStore('data').get('vault');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
+function writeRaw(value) {return new Promise((resolve,reject)=>{const tx=db.transaction('data','readwrite');tx.objectStore('data').put(value,'vault');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
+async function deriveKey(passphrase,bytes,iterations=250000) {const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(passphrase),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:bytes,iterations,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function seal(value) {const iv=crypto.getRandomValues(new Uint8Array(12)),payload=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(value)));return {format:FORMAT,iterations:250000,salt:bytesToBase64(salt),iv:bytesToBase64(iv),payload:bytesToBase64(new Uint8Array(payload))}}
+async function unseal(record,secret) {return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:base64ToBytes(record.iv)},secret,base64ToBytes(record.payload))))}
+export async function initialize() {db=await openDB();const saved=await readRaw();if(saved?.format===FORMAT){lockedRecord=saved;return {locked:true,vault:defaults()}}return {locked:false,vault:saved?{...defaults(),...saved}:defaults()}}
+export const isProtected = () => Boolean(key||lockedRecord);
+export const isLocked = () => Boolean(lockedRecord&&!key);
+export async function unlock(passphrase) {if(!lockedRecord)throw new Error('No locked vault found.');const bytes=base64ToBytes(lockedRecord.salt),derived=await deriveKey(passphrase,bytes,Number(lockedRecord.iterations)||250000),vault=await unseal(lockedRecord,derived);key=derived;salt=bytes;lockedRecord=null;return {...defaults(),...vault}}
+export async function saveVault(value) {const candidate=clone(value);const operation=queue.then(async()=>{if(!db)throw new Error('Local storage is unavailable.');if(isLocked())throw new Error('Unlock the vault before saving.');const previous=await readRaw();let wrote=false;try{await writeRaw(key?await seal(candidate):candidate);wrote=true;const stored=await readRaw();const decoded=key?await unseal(stored,key):stored;if(JSON.stringify(decoded)!==JSON.stringify(candidate))throw new Error('Saved data could not be verified.');return candidate}catch(error){if(wrote)try{await writeRaw(previous)}catch(rollback){throw new Error(`Save verification and rollback failed: ${rollback.message}`)}throw error}});queue=operation.catch(()=>{});return operation}
+export async function protect(value,passphrase) {if(!crypto?.subtle)throw new Error('Encryption requires HTTPS or localhost.');if(passphrase.length<12)throw new Error('Use at least 12 characters.');await queue;const bytes=crypto.getRandomValues(new Uint8Array(16)),secret=await deriveKey(passphrase,bytes);key=secret;salt=bytes;try{await saveVault(value)}catch(error){key=null;salt=null;throw error}}
+export async function lock() {await queue;const record=await readRaw();if(record?.format!==FORMAT)throw new Error('Encrypted vault was not found.');lockedRecord=record;key=null;salt=null}
+export async function reset() {await queue;await writeRaw(defaults());lockedRecord=null;key=null;salt=null;return defaults()}
+export async function erase() {return reset()}
