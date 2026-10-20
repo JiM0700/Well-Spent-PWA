@@ -20,7 +20,7 @@ npm run preview
 
 Serve through Vite (`npm run dev` or `npm run preview`). Opening the project’s `index.html` directly or serving this source folder with `python3 -m http.server` sends uncompiled JSX and will not start React. If an old server owns port 8000, stop it before starting Vite. You can also serve the built `dist/` folder with any static server.
 
-Run the local data and transaction smoke checks with `npm test`.
+Run the storage, transaction, analytics, and screen rendering checks with `npm test`.
 
 Deploy the contents of `dist/` over HTTPS. The production build includes a service worker that caches the React app shell and generated assets. After an update, open the app online once so the new service worker can install. The old plain JavaScript app is retained at `legacy/app.js` for reference only.
 
@@ -44,4 +44,12 @@ A passphrase encrypts the local IndexedDB vault with PBKDF2-SHA-256 and AES-256-
 
 ## Use
 
-Use Quick add or Add transaction on Home. A saved transaction appears in the activity list and totals after IndexedDB confirms the write. Search filters title, category, notes, tags, and amount. Bills, trends, custom categories, pasted payment review, theme, digest preferences, and local backup controls are available in the four main screens. Digest notifications only run while the app is open and browser permission is granted.
+The rebuilt interface has five screens: Overview, Transactions, Insights, Bills & subscriptions, and Settings. Use **Add transaction** to record an expense or income/refund. Amount, title, category, and date are presented together; notes and tags are optional. You can also paste a payment message and review its details before saving. Existing pending payment reviews remain available on Overview.
+
+Transactions supports search, category and direction filters, date periods, editing, and deletion with undo. Search all records with **⌘/Ctrl K**, or press **N** outside an input to add a transaction. Large ledgers load progressively.
+
+Insights includes an interactive spending line, category ring, income/expense bars, weekday averages, a 12-week spending calendar, cumulative budget pace, and a cycle-end estimate. Forecasts use recorded spending to date. No-spend days mean days without recorded expenses. Current budget pace and the calendar show their own clearly labeled periods. Chart points support keyboard arrows and selection to filter the ledger.
+
+Bills track recurring monthly commitments and paid status. Marking a bill paid does not add a transaction; log its payment separately to include it in spending. Use **Start a new bill cycle** to reset paid statuses when needed.
+
+Settings contains budget and cycle controls, light/dark/automatic appearance, categories, JSON backups, encryption, and local data deletion. The app follows the system’s reduced motion preference. Notifications, vibration, and sound effects have been removed from the interface and runtime. Existing vault fields and backup formats remain compatible; the redesign does not migrate or seed records.

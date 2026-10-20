@@ -10,7 +10,7 @@ class AppErrorBoundary extends React.Component {
   componentDidCatch(error, details) { console.error('Well Spent could not render:', error, details); }
   render() {
     if (!this.state.error) return this.props.children;
-    return <main style={{minHeight:'100vh',display:'grid',placeContent:'center',padding:24,fontFamily:'system-ui,sans-serif',background:'#f4fbff',color:'#1b5878'}} role="alert">
+    return <main style={{minHeight:'100vh',display:'grid',placeContent:'center',padding:24,fontFamily:'system-ui,sans-serif',background:'#f5f6f8',color:'#232838'}} role="alert">
       <h1>Well Spent could not open</h1>
       <p>Your saved data is still on this device. Reload the page after starting the Vite server.</p>
       <pre style={{maxWidth:500,whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{this.state.error.message}</pre>
